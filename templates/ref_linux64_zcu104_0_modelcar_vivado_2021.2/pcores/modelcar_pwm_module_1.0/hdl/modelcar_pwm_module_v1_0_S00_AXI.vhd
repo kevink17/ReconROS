@@ -422,12 +422,15 @@ begin
 	-- Add user logic here
 	slv_reg5(27 downto 0) <= std_logic_vector(echo_c);
 	srv0_c <= unsigned(slv_reg1(21 downto 0));
-    srv1_c <= unsigned(slv_reg3(21 downto 0)) when echo_c > 175000 else to_unsigned(150000, 22);
-    
 
     srv_proc: process(S_AXI_ACLK) is
     begin
         if rising_edge(S_AXI_ACLK) then
+            if echo_c < 175000 and unsigned(slv_reg3(21 downto 0)) > 160000 then
+                srv1_c <= to_unsigned(100000, 22);
+            else 
+                srv1_c <= unsigned(slv_reg3(21 downto 0));
+            end if;
             srv_count_0 <= srv_count_0 + 1;
             srv_count_1 <= srv_count_1 + 1;
             trig_count <= trig_count + 1;
