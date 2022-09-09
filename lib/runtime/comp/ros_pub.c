@@ -19,13 +19,22 @@ int ros_publisher_init(struct ros_publisher_t *ros_pub, struct ros_node_t * ros_
   ros_pub->rcl_pub= rcl_get_zero_initialized_publisher();
   rcl_publisher_options_t pub_options = rcl_publisher_get_default_options();
 
-    pub_options.qos.history = RMW_QOS_POLICY_HISTORY_KEEP_ALL;
-    pub_options.qos.lifespan.sec = 100;
+      //QOS Signal
+  pub_options.qos.history = RMW_QOS_POLICY_HISTORY_KEEP_LAST;
+  pub_options.qos.depth = 5;
+  pub_options.qos.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
+  pub_options.qos.durability = RMW_QOS_POLICY_DURABILITY_VOLATILE;
+  //pub_options.qos.deadline = RMW_QOS_DEADLINE_DEFAULT;
+  pub_options.qos.deadline.sec = 0;
+  pub_options.qos.deadline.nsec = 0;
+  //pub_options.qos.lifespan = RMW_QOS_LIFESPAN_DEFAULT;  
+  pub_options.qos.lifespan.sec = 0;
+  pub_options.qos.lifespan.nsec = 0;  
+  pub_options.qos.liveliness = RMW_QOS_POLICY_LIVELINESS_SYSTEM_DEFAULT;
+  pub_options.qos.liveliness_lease_duration.sec = 0;
+  pub_options.qos.liveliness_lease_duration.nsec = 0;
+  pub_options.qos.avoid_ros_namespace_conventions = false;
 
-    //my_subscription_options.qos.liveliness = RMW_QOS_POLICY_LIVELINESS_MANUAL_BY_TOPIC;
-
-
-    pub_options.qos.depth = 1000;
 
   rc = rcl_publisher_init(
       &ros_pub->rcl_pub,
