@@ -17,7 +17,7 @@
 #
 # ======================================================================
 
-
+<<reconos_preproc>>
 
 proc load_fifo_interfaces {repo_path} {
 	#
@@ -103,9 +103,9 @@ import_pcore $ip_repo timer_v1_00_a "xilinx.com:ip:axi_lite_ipif:3.0"
 set hwt_list [list]
 
 # add all hardware threads to the list (substitute dots in version string with underscores)
-lappend hwt_list rt_carcontrol_v[string map {. _} "1.00.a"]
-lappend hwt_list rt_carcontrol_v[string map {. _} "1.00.a"]
-
+<<generate for SLOTS>>
+lappend hwt_list <<HwtCoreName>>_v[string map {. _} "<<HwtCoreVersion>>"]
+<<end generate>>
 
 # make the elements of the list unique, i.e. remove duplicates
 set hwt_list [lsort -unique $hwt_list]

@@ -16,7 +16,7 @@
 -- 
 -- ======================================================================
 
-
+<<reconos_preproc>>
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -35,13 +35,10 @@ entity reconos_proc_control is
 	);
 	port (
 		-- Users to add ports here
-				PROC_Hwt_Rst_0     : out std_logic;
-		PROC_Hwt_Signal_0  : out std_logic;
-		
-		PROC_Hwt_Rst_1     : out std_logic;
-		PROC_Hwt_Signal_1  : out std_logic;
-		
-
+		<<generate for SLOTS>>
+		PROC_Hwt_Rst_<<Id>>     : out std_logic;
+		PROC_Hwt_Signal_<<Id>>  : out std_logic;
+		<<end generate>>
 
         PROC_Sys_Rst         : out std_logic;
         PROC_Pgf_Int         : out std_logic;
@@ -89,7 +86,7 @@ architecture procctrl of reconos_proc_control is
 	ATTRIBUTE X_INTERFACE_PARAMETER : STRING;
 
 	ATTRIBUTE X_INTERFACE_INFO of s00_axi_aclk: SIGNAL is "xilinx.com:signal:clock:1.0 s00_axi_aclk CLK";
-	ATTRIBUTE X_INTERFACE_PARAMETER of s00_axi_aclk: SIGNAL is "ASSOCIATED_RESET PROC_Hwt_Rst_0:PROC_Hwt_Rst_1:PROC_Sys_Rst:s00_axi_aresetn";
+	ATTRIBUTE X_INTERFACE_PARAMETER of s00_axi_aclk: SIGNAL is "ASSOCIATED_RESET <<generate for SLOTS>>PROC_Hwt_Rst_<<Id>>:<<end generate>>PROC_Sys_Rst:s00_axi_aresetn";
 
 	ATTRIBUTE X_INTERFACE_INFO of PROC_Pgf_Int: SIGNAL is "xilinx.com:signal:interrupt:1.0 PROC_Pgf_Int INTERRUPT";
 	ATTRIBUTE X_INTERFACE_PARAMETER of PROC_Pgf_Int: SIGNAL is "SENSITIVITY LEVEL_HIGH";
@@ -97,13 +94,10 @@ architecture procctrl of reconos_proc_control is
 	ATTRIBUTE X_INTERFACE_INFO of PROC_Sys_Rst: SIGNAL is "xilinx.com:signal:reset:1.0 PROC_Sys_Rst RST";
 	ATTRIBUTE X_INTERFACE_PARAMETER of PROC_Sys_Rst: SIGNAL is "POLARITY ACTIVE_HIGH";
 
-		ATTRIBUTE X_INTERFACE_INFO of PROC_Hwt_Rst_0: SIGNAL is "xilinx.com:signal:reset:1.0 PROC_Hwt_Rst_0 RST";
-	ATTRIBUTE X_INTERFACE_PARAMETER of PROC_Hwt_Rst_0: SIGNAL is "POLARITY ACTIVE_HIGH";
-	
-	ATTRIBUTE X_INTERFACE_INFO of PROC_Hwt_Rst_1: SIGNAL is "xilinx.com:signal:reset:1.0 PROC_Hwt_Rst_1 RST";
-	ATTRIBUTE X_INTERFACE_PARAMETER of PROC_Hwt_Rst_1: SIGNAL is "POLARITY ACTIVE_HIGH";
-	
-
+	<<generate for SLOTS>>
+	ATTRIBUTE X_INTERFACE_INFO of PROC_Hwt_Rst_<<Id>>: SIGNAL is "xilinx.com:signal:reset:1.0 PROC_Hwt_Rst_<<Id>> RST";
+	ATTRIBUTE X_INTERFACE_PARAMETER of PROC_Hwt_Rst_<<Id>>: SIGNAL is "POLARITY ACTIVE_HIGH";
+	<<end generate>>
 
     component ProcControlAXI_S00_AXI is
 	generic (
@@ -205,13 +199,10 @@ ProcControlAXI_v0_91_S00_AXI_inst : entity work.ProcControlAXI_S00_AXI
 	);
 
 	-- Add user logic here
-		PROC_Hwt_Rst_0 <= hwt_rst(0);
-	PROC_Hwt_Signal_0 <= hwt_sig(0);
-	
-	PROC_Hwt_Rst_1 <= hwt_rst(1);
-	PROC_Hwt_Signal_1 <= hwt_sig(1);
-	
-
+	<<generate for SLOTS>>
+	PROC_Hwt_Rst_<<Id>> <= hwt_rst(<<_i>>);
+	PROC_Hwt_Signal_<<Id>> <= hwt_sig(<<_i>>);
+	<<end generate>>
 	-- User logic ends
 
 end procctrl;

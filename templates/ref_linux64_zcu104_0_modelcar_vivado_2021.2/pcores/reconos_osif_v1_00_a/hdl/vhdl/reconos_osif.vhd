@@ -29,7 +29,7 @@
 -- 
 -- ======================================================================
 
-
+<<reconos_preproc>>
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -51,25 +51,17 @@ entity reconos_osif is
 	);
 	port (
 		-- Users to add ports here
-				OSIF_Hw2Sw_0_In_Data  : in  std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
-		OSIF_Hw2Sw_0_In_Empty : in  std_logic;
-		OSIF_Hw2Sw_0_In_RE    : out std_logic;
-		
-		OSIF_Hw2Sw_1_In_Data  : in  std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
-		OSIF_Hw2Sw_1_In_Empty : in  std_logic;
-		OSIF_Hw2Sw_1_In_RE    : out std_logic;
-		
+		<<generate for SLOTS>>
+		OSIF_Hw2Sw_<<Id>>_In_Data  : in  std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
+		OSIF_Hw2Sw_<<Id>>_In_Empty : in  std_logic;
+		OSIF_Hw2Sw_<<Id>>_In_RE    : out std_logic;
+		<<end generate>>
 
-
-				OSIF_Sw2Hw_0_In_Data  : out std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
-		OSIF_Sw2Hw_0_In_Full  : in  std_logic;
-		OSIF_Sw2Hw_0_In_WE    : out std_logic;
-		
-		OSIF_Sw2Hw_1_In_Data  : out std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
-		OSIF_Sw2Hw_1_In_Full  : in  std_logic;
-		OSIF_Sw2Hw_1_In_WE    : out std_logic;
-		
-
+		<<generate for SLOTS>>
+		OSIF_Sw2Hw_<<Id>>_In_Data  : out std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
+		OSIF_Sw2Hw_<<Id>>_In_Full  : in  std_logic;
+		OSIF_Sw2Hw_<<Id>>_In_WE    : out std_logic;
+		<<end generate>>
 		-- User ports ends
 
 		-- Ports of Axi Slave Bus Interface S00_AXI
@@ -104,27 +96,19 @@ architecture arch_imp of reconos_osif is
 	ATTRIBUTE X_INTERFACE_PARAMETER : STRING;
 
 	ATTRIBUTE X_INTERFACE_INFO of s00_axi_aclk: SIGNAL is "xilinx.com:signal:clock:1.0 s00_axi_aclk CLK";
-	ATTRIBUTE X_INTERFACE_PARAMETER of s00_axi_aclk: SIGNAL is "ASSOCIATED_BUSIF OSIF_Hw2Sw_0:OSIF_Sw2Hw_0:OSIF_Hw2Sw_1:OSIF_Sw2Hw_1:s00_axi";
+	ATTRIBUTE X_INTERFACE_PARAMETER of s00_axi_aclk: SIGNAL is "ASSOCIATED_BUSIF <<generate for SLOTS>>OSIF_Hw2Sw_<<Id>>:OSIF_Sw2Hw_<<Id>>:<<end generate>>s00_axi";
 
-		ATTRIBUTE X_INTERFACE_INFO of OSIF_Hw2Sw_0_In_Data:     SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 OSIF_Hw2Sw_0 FIFO64_S_Data";
-	ATTRIBUTE X_INTERFACE_INFO of OSIF_Hw2Sw_0_In_Empty:    SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 OSIF_Hw2Sw_0 FIFO64_S_Empty";
-	ATTRIBUTE X_INTERFACE_INFO of OSIF_Hw2Sw_0_In_RE:       SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 OSIF_Hw2Sw_0 FIFO64_S_RE";
-	
-	ATTRIBUTE X_INTERFACE_INFO of OSIF_Hw2Sw_1_In_Data:     SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 OSIF_Hw2Sw_1 FIFO64_S_Data";
-	ATTRIBUTE X_INTERFACE_INFO of OSIF_Hw2Sw_1_In_Empty:    SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 OSIF_Hw2Sw_1 FIFO64_S_Empty";
-	ATTRIBUTE X_INTERFACE_INFO of OSIF_Hw2Sw_1_In_RE:       SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 OSIF_Hw2Sw_1 FIFO64_S_RE";
-	
+	<<generate for SLOTS>>
+	ATTRIBUTE X_INTERFACE_INFO of OSIF_Hw2Sw_<<Id>>_In_Data:     SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 OSIF_Hw2Sw_<<Id>> FIFO64_S_Data";
+	ATTRIBUTE X_INTERFACE_INFO of OSIF_Hw2Sw_<<Id>>_In_Empty:    SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 OSIF_Hw2Sw_<<Id>> FIFO64_S_Empty";
+	ATTRIBUTE X_INTERFACE_INFO of OSIF_Hw2Sw_<<Id>>_In_RE:       SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 OSIF_Hw2Sw_<<Id>> FIFO64_S_RE";
+	<<end generate>>
 
-
-		ATTRIBUTE X_INTERFACE_INFO of OSIF_Sw2Hw_0_In_Data:     SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 OSIF_Sw2Hw_0 FIFO64_M_Data";
-	ATTRIBUTE X_INTERFACE_INFO of OSIF_Sw2Hw_0_In_Full:     SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 OSIF_Sw2Hw_0 FIFO64_M_Full";
-	ATTRIBUTE X_INTERFACE_INFO of OSIF_Sw2Hw_0_In_WE:       SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 OSIF_Sw2Hw_0 FIFO64_M_WE";
-	
-	ATTRIBUTE X_INTERFACE_INFO of OSIF_Sw2Hw_1_In_Data:     SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 OSIF_Sw2Hw_1 FIFO64_M_Data";
-	ATTRIBUTE X_INTERFACE_INFO of OSIF_Sw2Hw_1_In_Full:     SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 OSIF_Sw2Hw_1 FIFO64_M_Full";
-	ATTRIBUTE X_INTERFACE_INFO of OSIF_Sw2Hw_1_In_WE:       SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 OSIF_Sw2Hw_1 FIFO64_M_WE";
-	
-
+	<<generate for SLOTS>>
+	ATTRIBUTE X_INTERFACE_INFO of OSIF_Sw2Hw_<<Id>>_In_Data:     SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 OSIF_Sw2Hw_<<Id>> FIFO64_M_Data";
+	ATTRIBUTE X_INTERFACE_INFO of OSIF_Sw2Hw_<<Id>>_In_Full:     SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 OSIF_Sw2Hw_<<Id>> FIFO64_M_Full";
+	ATTRIBUTE X_INTERFACE_INFO of OSIF_Sw2Hw_<<Id>>_In_WE:       SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 OSIF_Sw2Hw_<<Id>> FIFO64_M_WE";
+	<<end generate>>
 
 	-- component declaration
 	component reconos_osif_axi is
@@ -174,25 +158,17 @@ reconos_osif_axi_inst : entity work.reconos_osif_axi
 	)
 	port map (
 		-- OSIF user ports
-				OSIF_Hw2Sw_0_In_Data  => OSIF_Hw2Sw_0_In_Data,
-		OSIF_Hw2Sw_0_In_Empty => OSIF_Hw2Sw_0_In_Empty,
-		OSIF_Hw2Sw_0_In_RE    => OSIF_Hw2Sw_0_In_RE,
-		
-		OSIF_Hw2Sw_1_In_Data  => OSIF_Hw2Sw_1_In_Data,
-		OSIF_Hw2Sw_1_In_Empty => OSIF_Hw2Sw_1_In_Empty,
-		OSIF_Hw2Sw_1_In_RE    => OSIF_Hw2Sw_1_In_RE,
-		
+		<<generate for SLOTS>>
+		OSIF_Hw2Sw_<<Id>>_In_Data  => OSIF_Hw2Sw_<<Id>>_In_Data,
+		OSIF_Hw2Sw_<<Id>>_In_Empty => OSIF_Hw2Sw_<<Id>>_In_Empty,
+		OSIF_Hw2Sw_<<Id>>_In_RE    => OSIF_Hw2Sw_<<Id>>_In_RE,
+		<<end generate>>
 
-
-				OSIF_Sw2Hw_0_In_Data  => OSIF_Sw2Hw_0_In_Data,
-		OSIF_Sw2Hw_0_In_Full  => OSIF_Sw2Hw_0_In_Full,
-		OSIF_Sw2Hw_0_In_WE    => OSIF_Sw2Hw_0_In_WE,
-		
-		OSIF_Sw2Hw_1_In_Data  => OSIF_Sw2Hw_1_In_Data,
-		OSIF_Sw2Hw_1_In_Full  => OSIF_Sw2Hw_1_In_Full,
-		OSIF_Sw2Hw_1_In_WE    => OSIF_Sw2Hw_1_In_WE,
-		
-
+		<<generate for SLOTS>>
+		OSIF_Sw2Hw_<<Id>>_In_Data  => OSIF_Sw2Hw_<<Id>>_In_Data,
+		OSIF_Sw2Hw_<<Id>>_In_Full  => OSIF_Sw2Hw_<<Id>>_In_Full,
+		OSIF_Sw2Hw_<<Id>>_In_WE    => OSIF_Sw2Hw_<<Id>>_In_WE,
+		<<end generate>>
 
 		S_AXI_ACLK	=> s00_axi_aclk,
 		S_AXI_ARESETN	=> s00_axi_aresetn,

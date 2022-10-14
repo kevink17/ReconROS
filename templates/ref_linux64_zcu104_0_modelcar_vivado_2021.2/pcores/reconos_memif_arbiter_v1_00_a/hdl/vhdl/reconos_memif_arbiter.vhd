@@ -19,7 +19,7 @@
 -- 
 -- ======================================================================
 
-
+<<reconos_preproc>>
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -55,25 +55,17 @@ entity reconos_memif_arbiter is
 	--   SYS_Rst - system reset
 	--
 	port (
-				MEMIF64_Hwt2Mem_0_In_Data  : in  std_logic_vector(C_MEMIF_DATA_WIDTH - 1 downto 0);
-		MEMIF64_Hwt2Mem_0_In_Empty : in  std_logic;
-		MEMIF64_Hwt2Mem_0_In_RE    : out std_logic;
-		
-		MEMIF64_Hwt2Mem_1_In_Data  : in  std_logic_vector(C_MEMIF_DATA_WIDTH - 1 downto 0);
-		MEMIF64_Hwt2Mem_1_In_Empty : in  std_logic;
-		MEMIF64_Hwt2Mem_1_In_RE    : out std_logic;
-		
+		<<generate for SLOTS>>
+		MEMIF64_Hwt2Mem_<<Id>>_In_Data  : in  std_logic_vector(C_MEMIF_DATA_WIDTH - 1 downto 0);
+		MEMIF64_Hwt2Mem_<<Id>>_In_Empty : in  std_logic;
+		MEMIF64_Hwt2Mem_<<Id>>_In_RE    : out std_logic;
+		<<end generate>>
 
-
-				MEMIF64_Mem2Hwt_0_In_Data  : out std_logic_vector(C_MEMIF_DATA_WIDTH - 1 downto 0);
-		MEMIF64_Mem2Hwt_0_In_Full  : in  std_logic;
-		MEMIF64_Mem2Hwt_0_In_WE    : out std_logic;
-		
-		MEMIF64_Mem2Hwt_1_In_Data  : out std_logic_vector(C_MEMIF_DATA_WIDTH - 1 downto 0);
-		MEMIF64_Mem2Hwt_1_In_Full  : in  std_logic;
-		MEMIF64_Mem2Hwt_1_In_WE    : out std_logic;
-		
-
+		<<generate for SLOTS>>
+		MEMIF64_Mem2Hwt_<<Id>>_In_Data  : out std_logic_vector(C_MEMIF_DATA_WIDTH - 1 downto 0);
+		MEMIF64_Mem2Hwt_<<Id>>_In_Full  : in  std_logic;
+		MEMIF64_Mem2Hwt_<<Id>>_In_WE    : out std_logic;
+		<<end generate>>
 
 		MEMIF64_Hwt2Mem_Out_Data  : out std_logic_vector(C_MEMIF_DATA_WIDTH - 1 downto 0);
 		MEMIF64_Hwt2Mem_Out_Empty : out std_logic;
@@ -96,7 +88,7 @@ architecture imp of reconos_memif_arbiter is
 	ATTRIBUTE X_INTERFACE_PARAMETER : STRING;
 
 	ATTRIBUTE X_INTERFACE_INFO of SYS_Clk: SIGNAL is "xilinx.com:signal:clock:1.0 SYS_Clk CLK";
-	ATTRIBUTE X_INTERFACE_PARAMETER of SYS_Clk: SIGNAL is "ASSOCIATED_RESET SYS_Rst, ASSOCIATED_BUSIF MEMIF64_Mem2Hwt_0:MEMIF64_Hwt2Mem_0:MEMIF64_Mem2Hwt_1:MEMIF64_Hwt2Mem_1:MEMIF64_Mem2Hwt_Out:MEMIF64_Hwt2Mem_Out";
+	ATTRIBUTE X_INTERFACE_PARAMETER of SYS_Clk: SIGNAL is "ASSOCIATED_RESET SYS_Rst, ASSOCIATED_BUSIF <<generate for SLOTS>>MEMIF64_Mem2Hwt_<<Id>>:MEMIF64_Hwt2Mem_<<Id>>:<<end generate>>MEMIF64_Mem2Hwt_Out:MEMIF64_Hwt2Mem_Out";
 
 	ATTRIBUTE X_INTERFACE_INFO of SYS_Rst: SIGNAL is "xilinx.com:signal:reset:1.0 SYS_Rst RST";
 	ATTRIBUTE X_INTERFACE_PARAMETER of SYS_Rst: SIGNAL is "POLARITY ACTIVE_HIGH";
@@ -109,25 +101,17 @@ architecture imp of reconos_memif_arbiter is
 	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Hwt2Mem_Out_Empty: SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 MEMIF64_Hwt2Mem_Out FIFO64_S_Empty";
 	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Hwt2Mem_Out_RE:    SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 MEMIF64_Hwt2Mem_Out FIFO64_S_RE";
 
-		ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Mem2Hwt_0_In_Data:  SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 MEMIF64_Mem2Hwt_0 FIFO64_M_Data";
-	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Mem2Hwt_0_In_Full:  SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 MEMIF64_Mem2Hwt_0 FIFO64_M_Full";
-	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Mem2Hwt_0_In_WE:    SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 MEMIF64_Mem2Hwt_0 FIFO64_M_WE";
-	
-	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Mem2Hwt_1_In_Data:  SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 MEMIF64_Mem2Hwt_1 FIFO64_M_Data";
-	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Mem2Hwt_1_In_Full:  SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 MEMIF64_Mem2Hwt_1 FIFO64_M_Full";
-	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Mem2Hwt_1_In_WE:    SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 MEMIF64_Mem2Hwt_1 FIFO64_M_WE";
-	
+	<<generate for SLOTS>>
+	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Mem2Hwt_<<Id>>_In_Data:  SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 MEMIF64_Mem2Hwt_<<Id>> FIFO64_M_Data";
+	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Mem2Hwt_<<Id>>_In_Full:  SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 MEMIF64_Mem2Hwt_<<Id>> FIFO64_M_Full";
+	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Mem2Hwt_<<Id>>_In_WE:    SIGNAL is "cs.upb.de:reconos:FIFO64_M:1.0 MEMIF64_Mem2Hwt_<<Id>> FIFO64_M_WE";
+	<<end generate>>
 
-
-		ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Hwt2Mem_0_In_Data:  SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 MEMIF64_Hwt2Mem_0 FIFO64_S_Data";
-	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Hwt2Mem_0_In_Empty: SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 MEMIF64_Hwt2Mem_0 FIFO64_S_Empty";
-	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Hwt2Mem_0_In_RE:    SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 MEMIF64_Hwt2Mem_0 FIFO64_S_RE";
-	
-	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Hwt2Mem_1_In_Data:  SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 MEMIF64_Hwt2Mem_1 FIFO64_S_Data";
-	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Hwt2Mem_1_In_Empty: SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 MEMIF64_Hwt2Mem_1 FIFO64_S_Empty";
-	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Hwt2Mem_1_In_RE:    SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 MEMIF64_Hwt2Mem_1 FIFO64_S_RE";
-	
-
+	<<generate for SLOTS>>
+	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Hwt2Mem_<<Id>>_In_Data:  SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 MEMIF64_Hwt2Mem_<<Id>> FIFO64_S_Data";
+	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Hwt2Mem_<<Id>>_In_Empty: SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 MEMIF64_Hwt2Mem_<<Id>> FIFO64_S_Empty";
+	ATTRIBUTE X_INTERFACE_INFO of MEMIF64_Hwt2Mem_<<Id>>_In_RE:    SIGNAL is "cs.upb.de:reconos:FIFO64_S:1.0 MEMIF64_Hwt2Mem_<<Id>> FIFO64_S_RE";
+	<<end generate>>
 
 	--
 	-- Internal state machine
@@ -173,9 +157,9 @@ begin
 
 	-- == Assignment of input signals =====================================
 
-				req(0) <= not MEMIF64_Hwt2Mem_0_In_Empty and msk(0);
-				req(1) <= not MEMIF64_Hwt2Mem_1_In_Empty and msk(1);
-		
+		<<generate for SLOTS>>
+		req(<<_i>>) <= not MEMIF64_Hwt2Mem_<<Id>>_In_Empty and msk(<<_i>>);
+		<<end generate>>
 
 	msb <= req and std_logic_vector(unsigned(not(req)) + 1);
 
@@ -248,35 +232,31 @@ begin
 	       '0';
 
 	hwt2mem_data <=
-	  	  (MEMIF64_Hwt2Mem_0_In_Data and (MEMIF64_Hwt2Mem_0_In_Data'Range => grnt(0))) or
-	  	  (MEMIF64_Hwt2Mem_1_In_Data and (MEMIF64_Hwt2Mem_1_In_Data'Range => grnt(1))) or
-	  
+	  <<generate for SLOTS>>
+	  (MEMIF64_Hwt2Mem_<<Id>>_In_Data and (MEMIF64_Hwt2Mem_<<Id>>_In_Data'Range => grnt(<<_i>>))) or
+	  <<end generate>>
 	  (C_MEMIF_DATA_WIDTH - 1 downto 0 => '0');
 
 	hwt2mem_empty <=
-	  	  (MEMIF64_Hwt2Mem_0_In_Empty and grnt(0)) or
-	  	  (MEMIF64_Hwt2Mem_1_In_Empty and grnt(1)) or
-	  
+	  <<generate for SLOTS>>
+	  (MEMIF64_Hwt2Mem_<<Id>>_In_Empty and grnt(<<_i>>)) or
+	  <<end generate>>
 	  orr;
 
 	mem2hwt_full <=
-	  	  (MEMIF64_Mem2Hwt_0_In_Full and grnt(0)) or
-	  	  (MEMIF64_Mem2Hwt_1_In_Full and grnt(1)) or
-	  
+	  <<generate for SLOTS>>
+	  (MEMIF64_Mem2Hwt_<<Id>>_In_Full and grnt(<<_i>>)) or
+	  <<end generate>>
 	  orr;
 
 	MEMIF64_Hwt2Mem_Out_Data  <= hwt2mem_data;
 	MEMIF64_Hwt2Mem_Out_Empty <= hwt2mem_empty;
 	MEMIF64_Mem2Hwt_Out_Full  <=  mem2hwt_full;
 	
-		MEMIF64_Hwt2Mem_0_In_RE   <= MEMIF64_Hwt2Mem_Out_RE and grnt(0);
-	MEMIF64_Mem2Hwt_0_In_Data <= MEMIF64_Mem2Hwt_Out_Data;
-	MEMIF64_Mem2Hwt_0_In_WE   <= MEMIF64_Mem2Hwt_Out_WE and grnt(0);
-	
-	MEMIF64_Hwt2Mem_1_In_RE   <= MEMIF64_Hwt2Mem_Out_RE and grnt(1);
-	MEMIF64_Mem2Hwt_1_In_Data <= MEMIF64_Mem2Hwt_Out_Data;
-	MEMIF64_Mem2Hwt_1_In_WE   <= MEMIF64_Mem2Hwt_Out_WE and grnt(1);
-	
-
+	<<generate for SLOTS>>
+	MEMIF64_Hwt2Mem_<<Id>>_In_RE   <= MEMIF64_Hwt2Mem_Out_RE and grnt(<<_i>>);
+	MEMIF64_Mem2Hwt_<<Id>>_In_Data <= MEMIF64_Mem2Hwt_Out_Data;
+	MEMIF64_Mem2Hwt_<<Id>>_In_WE   <= MEMIF64_Mem2Hwt_Out_WE and grnt(<<_i>>);
+	<<end generate>>
 
 end architecture imp;

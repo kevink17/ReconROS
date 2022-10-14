@@ -29,7 +29,7 @@
 -- 
 -- ======================================================================
 
-
+<<reconos_preproc>>
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -54,25 +54,17 @@ entity reconos_osif_axi is
 	);
 	port (
 		-- Users to add ports here
-				OSIF_Hw2Sw_0_In_Data  : in  std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
-		OSIF_Hw2Sw_0_In_Empty : in  std_logic;
-		OSIF_Hw2Sw_0_In_RE    : out std_logic;
-		
-		OSIF_Hw2Sw_1_In_Data  : in  std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
-		OSIF_Hw2Sw_1_In_Empty : in  std_logic;
-		OSIF_Hw2Sw_1_In_RE    : out std_logic;
-		
+		<<generate for SLOTS>>
+		OSIF_Hw2Sw_<<Id>>_In_Data  : in  std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
+		OSIF_Hw2Sw_<<Id>>_In_Empty : in  std_logic;
+		OSIF_Hw2Sw_<<Id>>_In_RE    : out std_logic;
+		<<end generate>>
 
-
-				OSIF_Sw2Hw_0_In_Data  : out std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
-		OSIF_Sw2Hw_0_In_Full  : in  std_logic;
-		OSIF_Sw2Hw_0_In_WE    : out std_logic;
-		
-		OSIF_Sw2Hw_1_In_Data  : out std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
-		OSIF_Sw2Hw_1_In_Full  : in  std_logic;
-		OSIF_Sw2Hw_1_In_WE    : out std_logic;
-		
-
+		<<generate for SLOTS>>
+		OSIF_Sw2Hw_<<Id>>_In_Data  : out std_logic_vector(C_OSIF_DATA_WIDTH - 1 downto 0);
+		OSIF_Sw2Hw_<<Id>>_In_Full  : in  std_logic;
+		OSIF_Sw2Hw_<<Id>>_In_WE    : out std_logic;
+		<<end generate>>
 		-- User ports ends
 
 		-- Global Clock Signal
@@ -271,9 +263,9 @@ begin
 	-- Connect AXI write data bus directly to OSIF interface of all slots
 	-- Slot is selected via WE
 	-- Ignore WSTRB
-		OSIF_Sw2Hw_0_In_Data <= S_AXI_WDATA;
-		OSIF_Sw2Hw_1_In_Data <= S_AXI_WDATA;
-	
+	<<generate for SLOTS>>
+	OSIF_Sw2Hw_<<Id>>_In_Data <= S_AXI_WDATA;
+	<<end generate>>
 
 	-- Modified process to set WE signals instead of writing to slave registers
 	-- Only handles writes to reg 1 (dedicated write register) of each slot
@@ -284,9 +276,9 @@ begin
 	  if rising_edge(S_AXI_ACLK) then 
 	    if S_AXI_ARESETN = '0' then
 	      --slv_reg0 <= (others => '0');
-		  		  OSIF_Sw2Hw_0_In_WE <= '0';
-		  		  OSIF_Sw2Hw_1_In_WE <= '0';
-		  
+		  <<generate for SLOTS>>
+		  OSIF_Sw2Hw_<<Id>>_In_WE <= '0';
+		  <<end generate>>
 	    else
 	      loc_addr := axi_awaddr(ADDR_LSB + OPT_MEM_ADDR_BITS downto ADDR_LSB);
 	      if (slv_reg_wren = '1') then
@@ -299,25 +291,22 @@ begin
 			-- 		slv_reg0(byte_index*8+7 downto byte_index*8) <= S_AXI_WDATA(byte_index*8+7 downto byte_index*8);
 	        --       end if;
 			--     end loop;
-								when std_logic_vector(to_unsigned(0 * 4 + 1, OPT_MEM_ADDR_BITS +1)) =>
-					OSIF_Sw2Hw_0_In_WE <= '1';
-				
-				when std_logic_vector(to_unsigned(1 * 4 + 1, OPT_MEM_ADDR_BITS +1)) =>
-					OSIF_Sw2Hw_1_In_WE <= '1';
-				
-
+				<<generate for SLOTS>>
+				when std_logic_vector(to_unsigned(<<_i>> * 4 + 1, OPT_MEM_ADDR_BITS +1)) =>
+					OSIF_Sw2Hw_<<Id>>_In_WE <= '1';
+				<<end generate>>
 
 	          when others =>
 				--slv_reg0 <= slv_reg0;
-								OSIF_Sw2Hw_0_In_WE <= '0';
-								OSIF_Sw2Hw_1_In_WE <= '0';
-				
+				<<generate for SLOTS>>
+				OSIF_Sw2Hw_<<Id>>_In_WE <= '0';
+				<<end generate>>
 
 			end case;
 		  else
-						OSIF_Sw2Hw_0_In_WE <= '0';
-						OSIF_Sw2Hw_1_In_WE <= '0';
-			
+			<<generate for SLOTS>>
+			OSIF_Sw2Hw_<<Id>>_In_WE <= '0';
+			<<end generate>>
 	      end if;
 	    end if;
 	  end if;                   
@@ -406,9 +395,9 @@ begin
 
 	-- Modified to read data or status from FIFOs instead of slave registers
 	process (
-				OSIF_Hw2Sw_0_In_Data, OSIF_Hw2Sw_0_In_Empty, OSIF_Sw2Hw_0_In_Full,
-				OSIF_Hw2Sw_1_In_Data, OSIF_Hw2Sw_1_In_Empty, OSIF_Sw2Hw_1_In_Full,
-		
+		<<generate for SLOTS>>
+		OSIF_Hw2Sw_<<Id>>_In_Data, OSIF_Hw2Sw_<<Id>>_In_Empty, OSIF_Sw2Hw_<<Id>>_In_Full,
+		<<end generate>>
 		axi_araddr, S_AXI_ARESETN, slv_reg_rden)
 	variable loc_addr :std_logic_vector(OPT_MEM_ADDR_BITS downto 0);
 	begin
@@ -417,29 +406,18 @@ begin
 	    case loc_addr is
 	    --   when b"00" =>
 	    --     reg_data_out <= slv_reg0;
-						when std_logic_vector(to_unsigned(0 * 4 + 0, OPT_MEM_ADDR_BITS +1)) =>
+			<<generate for SLOTS>>
+			when std_logic_vector(to_unsigned(<<_i>> * 4 + 0, OPT_MEM_ADDR_BITS +1)) =>
 				reg_data_out_osif_re_slot <= (others => '0');
-				reg_data_out_osif_re_slot(0) <= '1'; -- one-hot encoding: set slot which will receive RE signal
-				reg_data_out <= OSIF_Hw2Sw_0_In_Data; -- read data (reg 0)
-			when std_logic_vector(to_unsigned(0 * 4 + 2, OPT_MEM_ADDR_BITS +1)) =>
+				reg_data_out_osif_re_slot(<<_i>>) <= '1'; -- one-hot encoding: set slot which will receive RE signal
+				reg_data_out <= OSIF_Hw2Sw_<<Id>>_In_Data; -- read data (reg 0)
+			when std_logic_vector(to_unsigned(<<_i>> * 4 + 2, OPT_MEM_ADDR_BITS +1)) =>
 				reg_data_out_osif_re_slot <= (others => '0');
-				reg_data_out <= OSIF_Hw2Sw_0_In_Empty & "000" & x"0000000" & x"00000000"; -- read EMPTY status (reg 2)
-			when std_logic_vector(to_unsigned(0 * 4 + 3, OPT_MEM_ADDR_BITS +1)) =>
+				reg_data_out <= OSIF_Hw2Sw_<<Id>>_In_Empty & "000" & x"0000000" & x"00000000"; -- read EMPTY status (reg 2)
+			when std_logic_vector(to_unsigned(<<_i>> * 4 + 3, OPT_MEM_ADDR_BITS +1)) =>
 				reg_data_out_osif_re_slot <= (others => '0');
-				reg_data_out <= OSIF_Sw2Hw_0_In_Full & "000" & x"0000000" & x"00000000"; -- read FULL status (reg 3)
-			
-			when std_logic_vector(to_unsigned(1 * 4 + 0, OPT_MEM_ADDR_BITS +1)) =>
-				reg_data_out_osif_re_slot <= (others => '0');
-				reg_data_out_osif_re_slot(1) <= '1'; -- one-hot encoding: set slot which will receive RE signal
-				reg_data_out <= OSIF_Hw2Sw_1_In_Data; -- read data (reg 0)
-			when std_logic_vector(to_unsigned(1 * 4 + 2, OPT_MEM_ADDR_BITS +1)) =>
-				reg_data_out_osif_re_slot <= (others => '0');
-				reg_data_out <= OSIF_Hw2Sw_1_In_Empty & "000" & x"0000000" & x"00000000"; -- read EMPTY status (reg 2)
-			when std_logic_vector(to_unsigned(1 * 4 + 3, OPT_MEM_ADDR_BITS +1)) =>
-				reg_data_out_osif_re_slot <= (others => '0');
-				reg_data_out <= OSIF_Sw2Hw_1_In_Full & "000" & x"0000000" & x"00000000"; -- read FULL status (reg 3)
-			
-
+				reg_data_out <= OSIF_Sw2Hw_<<Id>>_In_Full & "000" & x"0000000" & x"00000000"; -- read FULL status (reg 3)
+			<<end generate>>
 		  when others =>
 		  	reg_data_out_osif_re_slot <= (others => '0');
 			reg_data_out  <= (others => '0');
@@ -452,9 +430,9 @@ begin
 	  if (rising_edge (S_AXI_ACLK)) then
 	    if ( S_AXI_ARESETN = '0' ) then
 		  axi_rdata  <= (others => '0');
-		  		  OSIF_Hw2Sw_0_In_RE <= '0';
-		  		  OSIF_Hw2Sw_1_In_RE <= '0';
-		  
+		  <<generate for SLOTS>>
+		  OSIF_Hw2Sw_<<Id>>_In_RE <= '0';
+		  <<end generate>>
 	    else
 	      if (slv_reg_rden = '1') then
 	        -- When there is a valid read address (S_AXI_ARVALID) with 
@@ -462,13 +440,13 @@ begin
 	        -- output the read dada 
 	        -- Read address mux
 			  axi_rdata <= reg_data_out;     -- register read data
-			  			  OSIF_Hw2Sw_0_In_RE <= reg_data_out_osif_re_slot(0);
-			  			  OSIF_Hw2Sw_1_In_RE <= reg_data_out_osif_re_slot(1);
-			  
+			  <<generate for SLOTS>>
+			  OSIF_Hw2Sw_<<Id>>_In_RE <= reg_data_out_osif_re_slot(<<_i>>);
+			  <<end generate>>
 		  else 
-						OSIF_Hw2Sw_0_In_RE <= '0';
-						OSIF_Hw2Sw_1_In_RE <= '0';
-			
+			<<generate for SLOTS>>
+			OSIF_Hw2Sw_<<Id>>_In_RE <= '0';
+			<<end generate>>
 	      end if;  
 	    end if;
 	  end if;

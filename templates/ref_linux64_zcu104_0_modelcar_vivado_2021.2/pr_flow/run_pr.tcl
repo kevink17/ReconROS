@@ -1,4 +1,4 @@
-
+<<reconos_preproc>>
 
 ###############################################################
 ###  Minimum settings required to run PR flow:
@@ -55,7 +55,11 @@ set top "design_1_wrapper"
 ### 3. Associate Reconfigurable Modules (RMs) to the RP
 ###############################################################
 
-
+<<generate for SLOTS(Reconfigurable==True)>>
+set rp<<Id>> "design_1_slot_<<Id>>_0"
+set rp<<Id>>_inst "design_1_i/slot_<<Id>>"
+set rm_variants($rp<<Id>>) "<<=generate for THREADS=>> <<Name>>_<<SlotId>> <<=end generate=>>"
+<<end generate>>
 
 ########################################################################
 ### RM Configurations (Valid combinations of RM variants)
@@ -63,7 +67,9 @@ set top "design_1_wrapper"
 ### 2. Define additional configurations: rm_config(xyz)
 ########################################################################
 
-
+<<generate for THREADS>>
+<<RMConfiguration>>
+<<end generate>>
 
 ########################################################################
 ### Task / flow portion

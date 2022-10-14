@@ -17,7 +17,7 @@
 --
 -- ======================================================================
 
-
+<<reconos_preproc>>
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -58,15 +58,11 @@ entity reconos_clock is
 		-- See AR# 58038 : https://www.xilinx.com/support/answers/58038.html
 		C_CLKIN_PERIOD : integer := 10;
 
-				C_CLK0_CLKFBOUT_MULT : integer := 16;
-		C_CLK0_DIVCLK_DIVIDE : integer := 1;
-		C_CLK0_CLKOUT_DIVIDE : integer := 16;
-		
-		C_CLK1_CLKFBOUT_MULT : integer := 16;
-		C_CLK1_DIVCLK_DIVIDE : integer := 1;
-		C_CLK1_CLKOUT_DIVIDE : integer := 16
-		
-
+		<<generate for CLOCKS>>
+		C_CLK<<Id>>_CLKFBOUT_MULT : integer := 16;
+		C_CLK<<Id>>_DIVCLK_DIVIDE : integer := 1;
+		C_CLK<<Id>>_CLKOUT_DIVIDE : integer := 16<<c;>>
+		<<end generate>>
 	);
 
 	--
@@ -81,13 +77,10 @@ entity reconos_clock is
 	port (
 		CLK_Ref       : in std_logic;
 
-				CLK0_Out    : out std_logic;
-		CLK0_Locked : out std_logic;
-		
-		CLK1_Out    : out std_logic;
-		CLK1_Locked : out std_logic;
-		
-
+		<<generate for CLOCKS>>
+		CLK<<Id>>_Out    : out std_logic;
+		CLK<<Id>>_Locked : out std_logic;
+		<<end generate>>
 
 		S_AXI_ACLK    : in  std_logic;
 		S_AXI_ARESETN : in  std_logic;
@@ -119,13 +112,10 @@ architecture imp of reconos_clock is
 
 	ATTRIBUTE X_INTERFACE_INFO of CLK_Ref: SIGNAL is "xilinx.com:signal:clock:1.0 CLK_Ref CLK";
 
-		ATTRIBUTE X_INTERFACE_INFO of CLK0_Out: SIGNAL is "xilinx.com:signal:clock:1.0 CLK0_Out CLK";
-	ATTRIBUTE X_INTERFACE_PARAMETER of CLK0_Out: SIGNAL is "FREQ_HZ 100000000";
-	
-	ATTRIBUTE X_INTERFACE_INFO of CLK1_Out: SIGNAL is "xilinx.com:signal:clock:1.0 CLK1_Out CLK";
-	ATTRIBUTE X_INTERFACE_PARAMETER of CLK1_Out: SIGNAL is "FREQ_HZ 100000000";
-	
-
+	<<generate for CLOCKS>>
+	ATTRIBUTE X_INTERFACE_INFO of CLK<<Id>>_Out: SIGNAL is "xilinx.com:signal:clock:1.0 CLK<<Id>>_Out CLK";
+	ATTRIBUTE X_INTERFACE_PARAMETER of CLK<<Id>>_Out: SIGNAL is "FREQ_HZ 100000000";
+	<<end generate>>
 
 	--
 	-- Internal ipif signals
@@ -151,19 +141,16 @@ architecture imp of reconos_clock is
 	constant C_ADDR_PAD : std_logic_vector(31 downto 0) := (others => '0');
 
 	constant C_ARD_ADDR_RANGE_ARRAY : SLV64_ARRAY_TYPE := (
-				2 * 0 + 0 => C_ADDR_PAD & std_logic_vector(unsigned(C_BASEADDR) + 0 * 4),
-		2 * 0 + 1 => C_ADDR_PAD & std_logic_vector(unsigned(C_BASEADDR) + 0 * 4 + 3),
-		
-		2 * 1 + 0 => C_ADDR_PAD & std_logic_vector(unsigned(C_BASEADDR) + 1 * 4),
-		2 * 1 + 1 => C_ADDR_PAD & std_logic_vector(unsigned(C_BASEADDR) + 1 * 4 + 3)
-		
-
+		<<generate for CLOCKS>>
+		2 * <<_i>> + 0 => C_ADDR_PAD & std_logic_vector(unsigned(C_BASEADDR) + <<_i>> * 4),
+		2 * <<_i>> + 1 => C_ADDR_PAD & std_logic_vector(unsigned(C_BASEADDR) + <<_i>> * 4 + 3)<<c,>>
+		<<end generate>>
 	);
 
 	constant C_ARD_NUM_CE_ARRAY : INTEGER_ARRAY_TYPE := (
-				0 => 1,
-				1 => 1
-		
+		<<generate for CLOCKS>>
+		<<_i>> => 1<<c,>>
+		<<end generate>>
 	);
 begin
 
@@ -231,27 +218,20 @@ begin
 
 			C_CLKIN_PERIOD => REAL(C_CLKIN_PERIOD),
 
-						C_CLK0_CLKFBOUT_MULT => C_CLK0_CLKFBOUT_MULT,
-			C_CLK0_DIVCLK_DIVIDE => C_CLK0_DIVCLK_DIVIDE,
-			C_CLK0_CLKOUT_DIVIDE => C_CLK0_CLKOUT_DIVIDE,
-			
-			C_CLK1_CLKFBOUT_MULT => C_CLK1_CLKFBOUT_MULT,
-			C_CLK1_DIVCLK_DIVIDE => C_CLK1_DIVCLK_DIVIDE,
-			C_CLK1_CLKOUT_DIVIDE => C_CLK1_CLKOUT_DIVIDE
-			
-
+			<<generate for CLOCKS>>
+			C_CLK<<Id>>_CLKFBOUT_MULT => C_CLK<<Id>>_CLKFBOUT_MULT,
+			C_CLK<<Id>>_DIVCLK_DIVIDE => C_CLK<<Id>>_DIVCLK_DIVIDE,
+			C_CLK<<Id>>_CLKOUT_DIVIDE => C_CLK<<Id>>_CLKOUT_DIVIDE<<c,>>
+			<<end generate>>
 		)
 
 		port map (
 			CLK_Ref => CLK_Ref,
 
-						CLK0_Out    => CLK0_Out,
-			CLK0_Locked => CLK0_Locked,
-			
-			CLK1_Out    => CLK1_Out,
-			CLK1_Locked => CLK1_Locked,
-			
-
+			<<generate for CLOCKS>>
+			CLK<<Id>>_Out    => CLK<<Id>>_Out,
+			CLK<<Id>>_Locked => CLK<<Id>>_Locked,
+			<<end generate>>
 
 			BUS2IP_Clk    => bus2ip_clk,
 			BUS2IP_Resetn => bus2ip_resetn,
