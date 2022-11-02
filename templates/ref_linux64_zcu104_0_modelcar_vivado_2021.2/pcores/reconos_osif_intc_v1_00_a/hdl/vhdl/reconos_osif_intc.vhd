@@ -16,7 +16,7 @@
 --
 -- ======================================================================
 
-
+<<reconos_preproc>>
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -48,9 +48,9 @@ entity reconos_osif_intc is
 	);
 	port (
 		-- INTC ports
-				OSIF_INTC_In_0   : in  std_logic;
-				OSIF_INTC_In_1   : in  std_logic;
-		
+		<<generate for SLOTS>>
+		OSIF_INTC_In_<<Id>>   : in  std_logic;
+		<<end generate>>
 		OSIF_INTC_Out   : out std_logic;
 	
 		-- Bus protocol ports, do not add to or delete
@@ -83,13 +83,10 @@ architecture implementation of reconos_osif_intc is
 	ATTRIBUTE X_INTERFACE_INFO : STRING;
 	ATTRIBUTE X_INTERFACE_PARAMETER : STRING;
 
-		ATTRIBUTE X_INTERFACE_INFO of OSIF_INTC_In_0: SIGNAL is "xilinx.com:signal:interrupt:1.0 OSIF_INTC_In_0 INTERRUPT";
-	ATTRIBUTE X_INTERFACE_PARAMETER of OSIF_INTC_In_0: SIGNAL is "SENSITIVITY LEVEL_HIGH";
-	
-	ATTRIBUTE X_INTERFACE_INFO of OSIF_INTC_In_1: SIGNAL is "xilinx.com:signal:interrupt:1.0 OSIF_INTC_In_1 INTERRUPT";
-	ATTRIBUTE X_INTERFACE_PARAMETER of OSIF_INTC_In_1: SIGNAL is "SENSITIVITY LEVEL_HIGH";
-	
-
+	<<generate for SLOTS>>
+	ATTRIBUTE X_INTERFACE_INFO of OSIF_INTC_In_<<Id>>: SIGNAL is "xilinx.com:signal:interrupt:1.0 OSIF_INTC_In_<<Id>> INTERRUPT";
+	ATTRIBUTE X_INTERFACE_PARAMETER of OSIF_INTC_In_<<Id>>: SIGNAL is "SENSITIVITY LEVEL_HIGH";
+	<<end generate>>
 
 	ATTRIBUTE X_INTERFACE_INFO of OSIF_INTC_Out: SIGNAL is "xilinx.com:signal:interrupt:1.0 OSIF_INTC_Out INTERRUPT";
 	ATTRIBUTE X_INTERFACE_PARAMETER of OSIF_INTC_Out: SIGNAL is "SENSITIVITY LEVEL_HIGH";
@@ -231,8 +228,8 @@ begin
 	user_Bus2IP_RdCE <= ipif_Bus2IP_RdCE(USER_NUM_REG-1 downto 0);
 	user_Bus2IP_WrCE <= ipif_Bus2IP_WrCE(USER_NUM_REG-1 downto 0);
 
-		intc_in(0) <= OSIF_INTC_In_0;
-		intc_in(1) <= OSIF_INTC_In_1;
-	
+	<<generate for SLOTS>>
+	intc_in(<<_i>>) <= OSIF_INTC_In_<<Id>>;
+	<<end generate>>
 
 end implementation;
