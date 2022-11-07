@@ -19,6 +19,7 @@ entity modelcar_pwm_module_v1_0 is
         servo_0 : out std_logic;
         servo_1 : out std_logic;
         trig : out std_logic;
+        echo_led : out std_logic;
         echo : in std_logic;
 		-- User ports ends
 		-- Do not modify the ports beyond this line
@@ -62,6 +63,7 @@ architecture arch_imp of modelcar_pwm_module_v1_0 is
 		servo_0 : out std_logic;
         servo_1 : out std_logic;
         trig : out std_logic;
+        echo_led : out std_logic;
         echo : in std_logic;
         
 		S_AXI_ACLK	: in std_logic;
@@ -101,6 +103,7 @@ modelcar_pwm_module_v1_0_S00_AXI_inst : modelcar_pwm_module_v1_0_S00_AXI
         servo_1 => servo_1,
         trig => trig,
         echo => echo,
+        echo_led => echo_led,
 		S_AXI_ACLK	=> s00_axi_aclk,
 		S_AXI_ARESETN	=> s00_axi_aresetn,
 		S_AXI_AWADDR	=> s00_axi_awaddr,
