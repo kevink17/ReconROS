@@ -21,6 +21,7 @@ entity modelcar_pwm_module_v1_0_S00_AXI is
         trig : out std_logic;
         echo_led : out std_logic;
         echo: in std_logic;
+        mag_sensor: in std_logic;
         
 		-- User ports ends
 		-- Do not modify the ports beyond this line
@@ -119,6 +120,7 @@ architecture arch_imp of modelcar_pwm_module_v1_0_S00_AXI is
 	signal slv_reg3	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 	signal slv_reg4	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 	signal slv_reg5 :std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
+	signal slv_reg6 :std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 	signal slv_reg_rden	: std_logic;
 	signal slv_reg_wren	: std_logic;
 	signal reg_data_out	:std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
@@ -129,13 +131,25 @@ architecture arch_imp of modelcar_pwm_module_v1_0_S00_AXI is
 	
 	signal srv0_a, srv1_a : unsigned(10 downto 0);
     signal srv0_c, srv1_c : unsigned(21 downto 0);
-    signal echo_c: unsigned(27 downto 0);
-    signal srv0_p, srv1_p, u_p, echo_p : std_logic;
+    signal echo_c, mag_sens_c: unsigned(27 downto 0);
+    signal srv0_p, srv1_p, u_p : std_logic;
+    
+    type echo_states is (e_idle, e_count);
+    signal echo_state : echo_states;
+    
+    signal mag_sensor_delayed : std_logic;
+    signal rising_edge_detected : std_logic;
+    signal no_speed : std_logic;
+    
+    --type mag_sens_states is (m_idle, m_count);
+    --signal mag_sens_state : mag_sens_states;
+    
 	
 	signal srv_count_0 : unsigned(21 downto 0) := (others => '0');
     signal srv_count_1 : unsigned(21 downto 0) := (others => '0');
     signal trig_count: unsigned(24 downto 0) := (others => '0');
     signal echo_count: unsigned(27 downto 0) := (others => '0');
+    signal mag_sens_count : unsigned(27 downto 0) := (others => '0');
 
 
 begin
@@ -376,7 +390,7 @@ begin
 	-- and the slave is ready to accept the read address.
 	slv_reg_rden <= axi_arready and S_AXI_ARVALID and (not axi_rvalid) ;
 
-	process (slv_reg0, slv_reg1, slv_reg2, slv_reg3, slv_reg4, axi_araddr, S_AXI_ARESETN, slv_reg_rden)
+	process (slv_reg0, slv_reg1, slv_reg2, slv_reg3, slv_reg4, slv_reg5, slv_reg6, axi_araddr, S_AXI_ARESETN, slv_reg_rden)
 	variable loc_addr :std_logic_vector(OPT_MEM_ADDR_BITS downto 0);
     variable tmp: std_logic_vector(C_S_AXI_DATA_WIDTH-1 downto 0);
 	begin
@@ -396,6 +410,8 @@ begin
 	        reg_data_out <= slv_reg4;
 	      when b"101" =>
             reg_data_out <= slv_reg5;
+          when b"110" =>
+            reg_data_out <= slv_reg6;
 	      when others =>
 	        reg_data_out  <= (others => '0');
 	    end case;
@@ -422,13 +438,14 @@ begin
 
 	-- Add user logic here
 	slv_reg5(27 downto 0) <= std_logic_vector(echo_c);
+	slv_reg6(27 downto 0) <= std_logic_vector(mag_sens_c);
 	srv0_c <= unsigned(slv_reg1(21 downto 0));
 
-    srv_proc: process(S_AXI_ACLK) is
+    count_proc: process(S_AXI_ACLK) is
     begin
         if rising_edge(S_AXI_ACLK) then
-            if echo_c < 175000 and unsigned(slv_reg3(21 downto 0)) > 160000 then
-                srv1_c <= to_unsigned(100000, 22);
+            if echo_c < 175_000 and unsigned(slv_reg3(21 downto 0)) > 160_000 then
+                srv1_c <= to_unsigned(100_000, 22);
                 echo_led <= '1';
             else 
                 srv1_c <= unsigned(slv_reg3(21 downto 0));
@@ -437,17 +454,17 @@ begin
             srv_count_0 <= srv_count_0 + 1;
             srv_count_1 <= srv_count_1 + 1;
             trig_count <= trig_count + 1;
-            if srv_count_0 = 2000000 then
+            if srv_count_0 = 2_000_000 then
                 srv_count_0 <= (others => '0');
             end if;
-            if srv_count_1 = 2000000 then
+            if srv_count_1 = 2_000_000 then
                 srv_count_1 <= (others => '0');
             end if;
-            if trig_count = 10000000 then
+            if trig_count = 10_000_000 then
                 trig_count <= (others => '0');
             end if;
         end if;
-    end process srv_proc;
+    end process count_proc;
     
     u_p <= '1' when trig_count < 1000 else '0';
     srv0_p <= '1' when srv_count_0 < srv0_c else '0';
@@ -482,23 +499,53 @@ begin
     echo_proc: process(S_AXI_ACLK) is
     begin
         if rising_edge(S_AXI_ACLK) then
-            if echo = '1' and echo_p = '0' then 
-                echo_p <= '1';
-            end if;
-            
-            if echo_p = '1' and echo = '1' then
-                echo_count <= echo_count + 1;
-            end if;
-            
-            if echo = '0' and echo_p = '1' then
-                echo_p <= '0';
-                echo_c <= echo_count;
-            end if;
-            if echo = '0' and echo_p = '0' then
-                echo_count <= (others => '0');
-            end if;
+            case echo_state is
+                when e_idle =>
+                    echo_count <= (others => '0');
+                    if echo = '1' then
+                        echo_state <= e_count;
+                    end if;
+                 when e_count =>
+                    echo_count <= echo_count + 1;
+                    if echo = '0' then
+                        echo_state <= e_idle;
+                        echo_c <= echo_count;
+                    end if;
+            end case;
         end if;
      end process echo_proc;
+     
+     mag_detect_process: process(S_AXI_ACLK) is
+     begin
+        if rising_edge(S_AXI_ACLK) then
+            mag_sensor_delayed <= mag_sensor;
+            
+            rising_edge_detected <= mag_sensor and (not mag_sensor_delayed);
+        end if;
+     end process mag_detect_process;
+        
+     mag_process: process(S_AXI_ACLK, rising_edge_detected) is
+     begin
+        if rising_edge(S_AXI_ACLK) then
+            mag_sens_count <= mag_sens_count + 1;
+            -- Car has been driving and detected a valid rsising edge
+            if rising_edge_detected = '1' and no_speed = '0'  and mag_sens_count > 5_000_000 then
+                mag_sens_c <= mag_sens_count;
+                mag_sens_count <= (others => '0');
+            -- Car was not driving and a new rising edge edge has been detected, car is driving again
+            elsif rising_edge_detected = '1' and no_speed = '1' then
+                mag_sens_c <= (others => '0');
+                mag_sens_count <= (others => '0');
+                no_speed <= '0';
+            -- No valid rising edge detected in time, car appears is stopped
+            elsif mag_sens_count >= 50_000_000 then
+                mag_sens_count <= (others => '0');
+                mag_sens_c <= (others => '0');
+                no_speed <= '1';
+            end if;
+        end if;
+        
+     end process mag_process;
 	-- User logic ends
 
 end arch_imp;

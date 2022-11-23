@@ -435,6 +435,8 @@ proc reconos_hw_setup {new_project_name new_project_path reconos_ip_dir} {
     make_bd_pins_external  [get_bd_pins modelcar_pwm_module_0/echo]
     #--> echo_led_0
     make_bd_pins_external  [get_bd_pins modelcar_pwm_module_0/echo_led]
+    #--> mag_sensor_0
+    make_bd_pins_external  [get_bd_pins modelcar_pwm_module_0/mag_sensor]
     #
     # Memory Map of peripherals
     #

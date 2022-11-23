@@ -236,6 +236,8 @@ set_property PACKAGE_PIN H6 [get_ports echo_0]
 set_property IOSTANDARD LVCMOS33 [get_ports echo_0]
 set_property PACKAGE_PIN B5 [get_ports echo_led_0]
 set_property IOSTANDARD LVCMOS33 [get_ports echo_led_0]
+set_property PACKAGE_PIN G7 [get_ports mag_sensor_0]
+set_property IOSTANDARD LVCMOS33 [get_ports mag_sensor_0]
 #Other net   PACKAGE_PIN AD9      - MGT1V2                    Bank 224 - MGTAVTTRCAL_R
 #Other net   PACKAGE_PIN A24      - MIO0_QSPI_LWR_CLK         Bank 500 - PS_MIO0
 #Other net   PACKAGE_PIN C24      - MIO1_QSPI_LWR_DQ1         Bank 500 - PS_MIO1
