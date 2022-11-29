@@ -137,19 +137,20 @@ architecture arch_imp of modelcar_pwm_module_v1_0_S00_AXI is
     type echo_states is (e_idle, e_count);
     signal echo_state : echo_states;
     
+    type mag_states is (mag_wait_rising_idle, mag_wait_falling_idle, mag_wait_rising, mag_wait_falling);
+    signal mag_state: mag_states;
+    
     signal mag_sensor_delayed : std_logic;
     signal rising_edge_detected : std_logic;
+    signal falling_edge_detected : std_logic;
     signal no_speed : std_logic;
-    
-    --type mag_sens_states is (m_idle, m_count);
-    --signal mag_sens_state : mag_sens_states;
-    
-	
+    	
 	signal srv_count_0 : unsigned(21 downto 0) := (others => '0');
     signal srv_count_1 : unsigned(21 downto 0) := (others => '0');
     signal trig_count: unsigned(24 downto 0) := (others => '0');
     signal echo_count: unsigned(27 downto 0) := (others => '0');
     signal mag_sens_count : unsigned(27 downto 0) := (others => '0');
+    signal mag_pulse_count : unsigned(27 downto 0) := (others => '0');
 
 
 begin
@@ -521,6 +522,7 @@ begin
             mag_sensor_delayed <= mag_sensor;
             
             rising_edge_detected <= mag_sensor and (not mag_sensor_delayed);
+            falling_edge_detected <= mag_sensor_delayed and (not mag_sensor);
         end if;
      end process mag_detect_process;
         
@@ -528,21 +530,43 @@ begin
      begin
         if rising_edge(S_AXI_ACLK) then
             mag_sens_count <= mag_sens_count + 1;
+            mag_pulse_count <= mag_pulse_count + 1;
             -- Car has been driving and detected a valid rsising edge
-            if rising_edge_detected = '1' and no_speed = '0'  and mag_sens_count > 5_000_000 then
-                mag_sens_c <= mag_sens_count;
-                mag_sens_count <= (others => '0');
-            -- Car was not driving and a new rising edge edge has been detected, car is driving again
-            elsif rising_edge_detected = '1' and no_speed = '1' then
-                mag_sens_c <= (others => '0');
-                mag_sens_count <= (others => '0');
-                no_speed <= '0';
-            -- No valid rising edge detected in time, car appears is stopped
-            elsif mag_sens_count >= 50_000_000 then
-                mag_sens_count <= (others => '0');
-                mag_sens_c <= (others => '0');
-                no_speed <= '1';
-            end if;
+            case mag_state is
+                when mag_wait_rising_idle =>
+                    mag_sens_count <= (others => '0');
+                    mag_pulse_count <= (others => '0');
+                    mag_sens_c <= (others => '0');
+                    if rising_edge_detected = '1' then
+                        mag_state <= mag_wait_falling_idle;
+                    end if;
+                when mag_wait_falling_idle =>
+                    mag_sens_count <= (others => '0');
+                    if mag_pulse_count > 50_000_000 then
+                        mag_state <= mag_wait_rising_idle;
+                    elsif falling_edge_detected = '1' and mag_pulse_count < 100_000 then
+                        mag_state <= mag_wait_rising_idle;
+                    elsif falling_edge_detected = '1' and mag_pulse_count >= 100_000 then
+                        mag_state <= mag_wait_rising;
+                    end if;
+                when mag_wait_rising =>
+                    mag_pulse_count <= (others => '0');
+                    if mag_sens_count > 50_000_000 then
+                        mag_state <= mag_wait_rising_idle;
+                    elsif rising_edge_detected = '1' then
+                        mag_state <= mag_wait_falling;
+                    end if;
+                when mag_wait_falling => 
+                    if mag_sens_count > 50_000_000 then
+                        mag_state <= mag_wait_rising_idle;
+                    elsif falling_edge_detected = '1' and mag_pulse_count < 100_000 then
+                        mag_state <= mag_wait_rising;
+                    elsif falling_edge_detected = '1' and mag_pulse_count >= 100_000 then
+                        mag_sens_c <= mag_sens_count;
+                        mag_sens_count <= (others => '0');
+                        mag_state <= mag_wait_rising;                      
+                    end if;                      
+            end case;
         end if;
         
      end process mag_process;
