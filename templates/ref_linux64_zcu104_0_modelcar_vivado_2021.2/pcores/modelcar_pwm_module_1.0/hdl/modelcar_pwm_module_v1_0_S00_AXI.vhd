@@ -445,13 +445,8 @@ begin
     count_proc: process(S_AXI_ACLK) is
     begin
         if rising_edge(S_AXI_ACLK) then
-            if echo_c < 175_000 and unsigned(slv_reg3(21 downto 0)) > 160_000 then
-                srv1_c <= to_unsigned(100_000, 22);
-                echo_led <= '1';
-            else 
-                srv1_c <= unsigned(slv_reg3(21 downto 0));
-                echo_led <= '0';
-            end if;
+            srv1_c <= unsigned(slv_reg3(21 downto 0));
+            echo_led <= '0';
             srv_count_0 <= srv_count_0 + 1;
             srv_count_1 <= srv_count_1 + 1;
             trig_count <= trig_count + 1;
