@@ -226,17 +226,17 @@
 #set_property PACKAGE_PIN AP18     [get_ports "6N12773"] ;# Bank  64 VCCO - VCC1V2   - IO_L1P_T0L_N0_DBC_64
 #set_property IOSTANDARD  LVCMOSxxn [get_ports "6N12773"] ;# Bank  64 VCCO - VCC1V2   - IO_L1P_T0L_N0_DBC_64
 #Other net   PACKAGE_PIN AG16     - 6N11370                   Bank  64 - VREF_64
-set_property PACKAGE_PIN G8 [get_ports servo_0_0]
+set_property PACKAGE_PIN J6 [get_ports servo_0_0]
 set_property IOSTANDARD LVCMOS33 [get_ports servo_0_0]
-set_property PACKAGE_PIN H8 [get_ports servo_1_0]
+set_property PACKAGE_PIN J7 [get_ports servo_1_0]
 set_property IOSTANDARD LVCMOS33 [get_ports servo_1_0]
-set_property PACKAGE_PIN G6 [get_ports trig_0]
+set_property PACKAGE_PIN G7 [get_ports trig_0]
 set_property IOSTANDARD LVCMOS33 [get_ports trig_0]
-set_property PACKAGE_PIN H6 [get_ports echo_0]
+set_property PACKAGE_PIN H8 [get_ports echo_0]
 set_property IOSTANDARD LVCMOS33 [get_ports echo_0]
 set_property PACKAGE_PIN B5 [get_ports echo_led_0]
 set_property IOSTANDARD LVCMOS33 [get_ports echo_led_0]
-set_property PACKAGE_PIN G7 [get_ports mag_sensor_0]
+set_property PACKAGE_PIN H7 [get_ports mag_sensor_0]
 set_property IOSTANDARD LVCMOS33 [get_ports mag_sensor_0]
 #Other net   PACKAGE_PIN AD9      - MGT1V2                    Bank 224 - MGTAVTTRCAL_R
 #Other net   PACKAGE_PIN A24      - MIO0_QSPI_LWR_CLK         Bank 500 - PS_MIO0
