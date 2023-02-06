@@ -16,10 +16,12 @@ int ros_publisher_init(struct ros_publisher_t *ros_pub, struct ros_node_t * ros_
 {
   rcl_ret_t rc = 0;
 
+  ros_pub->msg_type = msg_type;
   ros_pub->rcl_pub= rcl_get_zero_initialized_publisher();
   rcl_publisher_options_t pub_options = rcl_publisher_get_default_options();
+  pub_options.qos.depth = 1;
 
-      //QOS Signal
+ /*     //QOS Signal
   pub_options.qos.history = RMW_QOS_POLICY_HISTORY_KEEP_LAST;
   pub_options.qos.depth = 5;
   pub_options.qos.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
@@ -34,7 +36,7 @@ int ros_publisher_init(struct ros_publisher_t *ros_pub, struct ros_node_t * ros_
   pub_options.qos.liveliness_lease_duration.sec = 0;
   pub_options.qos.liveliness_lease_duration.nsec = 0;
   pub_options.qos.avoid_ros_namespace_conventions = false;
-
+*/
 
   rc = rcl_publisher_init(
       &ros_pub->rcl_pub,
@@ -71,6 +73,32 @@ int ros_publisher_publish(struct ros_publisher_t *ros_pub, void * msg)
     return 0;
   } else {
     debug("[ROS Publisher] Error publishing message!\n");
+    return rc;
+  }
+}
+
+int ros_publisher_borrow_loaned_message(struct ros_publisher_t *ros_pub, void ** msg) {
+  rcl_ret_t rc;
+
+  rc = rcl_borrow_loaned_message(&ros_pub->rcl_pub, ros_pub->msg_type, msg);
+
+  if(rc != RCL_RET_OK)
+  {
+      debug("[ROS Publisher Borrow Loaned] Return Error number: %d\n", rc);
+      return -1;
+  }
+  return 0;
+}
+
+int ros_publisher_publish_loaned_message(struct ros_publisher_t *ros_pub, void * msg) {
+  rcl_ret_t rc;
+
+  rc = rcl_publish_loaned_message(&ros_pub->rcl_pub, msg, NULL);
+  if (rc == RCL_RET_OK) {
+    debug("[ROS Publisher Publish Loaned] Published message!\n");
+    return 0;
+  } else {
+    debug("[ROS Publisher Publish Loaned] Error publishing message! Error: %d\n", rc);
     return rc;
   }
 }
