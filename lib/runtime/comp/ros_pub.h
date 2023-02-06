@@ -19,6 +19,7 @@
 struct ros_publisher_t {
     rcl_node_t*     node;
     rcl_publisher_t rcl_pub;
+    const rosidl_message_type_support_t * msg_type;
 };
 
 /*
@@ -44,6 +45,16 @@ extern int ros_publisher_destroy(struct ros_publisher_t *ros_pub);
  *   msg - message to put into the mbox
  */
 extern int ros_publisher_publish(struct ros_publisher_t *ros_pub, void * msg);
+
+/*
+ * Get a loaned message to write into.
+ */
+extern int ros_publisher_borrow_loaned_message(struct ros_publisher_t *ros_pub, void ** msg);
+
+/*
+ * Publish a loaned message.
+ */
+extern int ros_publisher_publish_loaned_message(struct ros_publisher_t *ros_pub, void * msg);
 
 
 #endif /* MBOX_H */

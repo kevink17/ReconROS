@@ -32,7 +32,7 @@ int ros_subscriber_init(struct ros_subscriber_t *ros_sub, struct ros_node_t * ro
 
     //QOS Signal
     my_subscription_options.qos.history = RMW_QOS_POLICY_HISTORY_KEEP_LAST;
-    my_subscription_options.qos.depth = 5;
+    my_subscription_options.qos.depth = 1;
     my_subscription_options.qos.reliability = RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT;
     my_subscription_options.qos.durability = RMW_QOS_POLICY_DURABILITY_VOLATILE;
     //my_subscription_options.qos.deadline = RMW_QOS_DEADLINE_DEFAULT;
@@ -87,7 +87,11 @@ int ros_subscriber_message_try_take(struct ros_subscriber_t *ros_sub, void * msg
     rmw_message_info_t messageInfo;
 
     rc = rcl_take(&ros_sub->sub, msg,  &messageInfo,NULL );
-    
+
+    if (rcl_subscription_can_loan_messages(&ros_sub->sub)) {
+        debug("[ROS Subscriber] wrong method call, message can be loaned\n");
+    }
+
     if(rc != RCL_RET_OK)
     {
         if(rc != RCL_RET_SUBSCRIPTION_TAKE_FAILED)
@@ -111,5 +115,48 @@ int ros_subscriber_message_take(struct ros_subscriber_t *ros_sub, void * msg)
     while(ros_subscriber_message_try_take(ros_sub, msg) != 0)
         usleep(ros_sub->wait_time);
 
+    return 0;
+}
+
+int ros_subscriber_loaned_message_try_take(struct ros_subscriber_t *ros_sub, void ** msg) {
+    rcl_ret_t rc;
+    rmw_message_info_t messageInfo;
+
+    rc = rcl_take_loaned_message(&ros_sub->sub, msg, &messageInfo, NULL);
+
+    if(rc != RCL_RET_OK)
+    {
+        if(rc != RCL_RET_SUBSCRIPTION_TAKE_FAILED)
+        {
+            debug("[ROS Subscriber Loaned] Error number: %d\n", rc);
+            return -1;
+        }
+        else
+        {
+            //debug("[ROS Subscriber] Return code : %d\n", rc);
+            return 1;
+        }        
+    }
+
+    return 0;
+}
+
+int ros_subscriber_loaned_message_take(struct ros_subscriber_t *ros_sub, void ** msg) {
+    while(ros_subscriber_loaned_message_try_take(ros_sub, msg) != 0)
+        usleep(ros_sub->wait_time);
+
+    return 0;
+}
+
+int ros_subscriber_loaned_message_return(struct ros_subscriber_t *ros_sub, void * msg) {
+    rcl_ret_t rc;
+
+    rc = rcl_return_loaned_message_from_subscription(&ros_sub->sub, msg);
+
+    if(rc != RCL_RET_OK)
+    {
+        debug("[ROS Subscriber Loaned] Return Error number: %d\n", rc);
+        return -1;
+    }
     return 0;
 }
