@@ -2,7 +2,7 @@
 
 CC = $(CROSS_COMPILE)gcc
 CFLAGS += -Wall -I <<REPO_REL>> -I lib/include -I /opt/ros/galactic/include/ -I ../build.msg/install/*/include/ -D RECONOS_OS_<<OS>> -D RECONOS_BOARD_<<BOARD>> -DROS2_DISTRIBUTION=<<ROS2_DISTRIBUTION>> <<CFLAGS>>
-LDFLAGS += -lpthread <<LDFLAGS>> -Bdynamic -L /opt/ros/galactic/lib/*.so -L ../build.msg/install/*/lib/*.so
+LDFLAGS += -lpthread <<LDFLAGS>> -Bdynamic -L /opt/ros/galactic/lib/*.so -L /opt/ros/galactic/lib/*/*.so -L ../build.msg/install/*/lib/*.so
 
 MKDIRP = mkdir -p
 

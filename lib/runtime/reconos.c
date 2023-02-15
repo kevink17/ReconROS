@@ -1234,6 +1234,94 @@ intr:
 	return -1;
 }
 
+static inline int dt_ros_borrow(struct hwslot *slot) {
+	int handle;
+	void *msg = NULL;
+	handle = reconos_osif_read(slot->osif);
+	RESOURCE_CHECK_TYPE(handle, RECONOS_RESOURCE_TYPE_ROSPUB);
+
+	debug("[reconos-dt-%d] (ros_borrow on %d) ...\n", slot->id, handle);
+	SYSCALL_BLOCK(ros_publisher_borrow_loaned_message(slot->rt->resources[handle].ptr, &msg));
+	debug("[reconos-dt-%d] (ros_borrow on %d) done\n", slot->id, handle);
+
+	reconos_osif_write(slot->osif, (RRUBASETYPE)msg);
+
+	return 0;
+
+intr:
+	return -1;
+}
+
+static inline int dt_ros_publish_loaned(struct hwslot *slot) {
+	int handle, ret;
+	void* msg_handle;
+	timespec_diff(&t_start, &t_end, &t_res);
+	handle = reconos_osif_read(slot->osif);
+	RESOURCE_CHECK_TYPE(handle, RECONOS_RESOURCE_TYPE_ROSPUB);
+	msg_handle = (void *) reconos_osif_read(slot->osif);
+
+	debug("[reconos-dt-%d] (ros_publish_loaned on %d) ...\n", slot->id, handle);
+
+	SYSCALL_NONBLOCK(ret = ros_publisher_publish_loaned_message(slot->rt->resources[handle].ptr, msg_handle));
+	debug("[reconos-dt-%d] (ros_publish_loaned on %d) done\n", slot->id, handle);
+
+	reconos_osif_write(slot->osif, (RRUBASETYPE)ret);
+
+	return 0;
+
+intr:
+	return -1;
+}
+
+static inline int dt_ros_take_loaned(struct hwslot *slot) {
+	int handle;
+	// int msg_handle;
+	void *msg = NULL;
+
+	handle = reconos_osif_read(slot->osif);
+	RESOURCE_CHECK_TYPE(handle, RECONOS_RESOURCE_TYPE_ROSSUB);
+	// msg_handle = reconos_osif_read(slot->osif);
+	// RESOURCE_CHECK_TYPE(msg_handle, RECONOS_RESOURCE_TYPE_ROSMSG);
+
+	debug("[reconos-dt-%d] (ros_take_loaned on %d) ...\n", slot->id, handle);
+	SYSCALL_BLOCK(ros_subscriber_loaned_message_take(slot->rt->resources[handle].ptr, &msg));
+	debug("[reconos-dt-%d] (ros_take_loaned on %d) done\n", slot->id, handle);
+
+	clock_gettime(CLOCK_MONOTONIC, &t_start);
+
+	reconos_osif_write(slot->osif, (RRUBASETYPE)msg);
+
+	return 0;
+
+intr:
+	return -1;
+}
+
+static inline int dt_ros_return_loaned(struct hwslot *slot) {
+	int handle;
+	// int msg_handle;
+	void * msg;
+
+	handle = reconos_osif_read(slot->osif);
+	RESOURCE_CHECK_TYPE(handle, RECONOS_RESOURCE_TYPE_ROSSUB);
+	msg = (void *) reconos_osif_read(slot->osif);
+	// RESOURCE_CHECK_TYPE(msg_handle, RECONOS_RESOURCE_TYPE_ROSMSG);
+
+	debug("[reconos-dt-%d] (ros_return_loaned on %d) ...\n", slot->id, handle);
+	SYSCALL_BLOCK(ros_subscriber_loaned_message_return(slot->rt->resources[handle].ptr, msg));
+	debug("[reconos-dt-%d] (ros_return_loaned on %d) done\n", slot->id, handle);
+	printf("[reconos-dt-%d] (ros_return_loaned on %d) done\n", slot->id, handle);
+
+	clock_gettime(CLOCK_MONOTONIC, &t_start);
+
+	reconos_osif_write(slot->osif, (RRUBASETYPE)0);
+
+	return 0;
+
+intr:
+	return -1;
+}
+
 static inline int dt_ros_services_response(struct hwslot *slot) {
 	int handle, ret;
 	int msg_handle;
@@ -2010,6 +2098,22 @@ void *dt_delegate(void *arg) {
 
 			case OSIF_CMD_ROS_TRYTAKE:
 				dt_ros_trytake(slot);
+				break;
+
+			case OSIF_CMD_ROS_BORROW:
+				dt_ros_borrow(slot);
+				break;
+
+			case OSIF_CMD_ROS_PUBLISH_LOANED:
+				dt_ros_publish_loaned(slot);
+				break;
+
+			case OSIF_CMD_ROS_TAKE_LOANED:
+				dt_ros_take_loaned(slot);
+				break;
+
+			case OSIF_CMD_ROS_RETURN_LOANED:
+				dt_ros_return_loaned(slot);
 				break;
 
 			case OSIF_CMD_ROS_SERVICES_RESPONSE:

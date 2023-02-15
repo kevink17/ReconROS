@@ -50,6 +50,22 @@ extern int ros_subscriber_destroy(struct ros_subscriber_t *ros_sub);
 extern int ros_subscriber_message_take(struct ros_subscriber_t *ros_sub, void * msg);
 
 /*
+ * receive a loaned message from the given topic. The loaned message needs to be returned after using it.
+ *
+ *   mb  - pointer to the subscriber instance
+ *   msg - message pointer to the loaned message
+ */
+extern int ros_subscriber_loaned_message_take(struct ros_subscriber_t *ros_sub, void ** msg);
+
+/*
+ * return a loaned message from the given topic
+ *
+ *   mb  - pointer to the subscriber instance
+ *   msg - message pointer to the loaned message
+ */
+extern int ros_subscriber_loaned_message_return(struct ros_subscriber_t *ros_sub, void * msg);
+
+/*
  * Try to receive a message from the given topic.
  *
  *   mb  - pointer to the subscriber instance
