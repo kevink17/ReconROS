@@ -407,26 +407,26 @@ inline RRUBASETYPE stream_read_memif(hls::stream<RRUBASETYPE> &stream) {
 	stream_write(osif_hw2sw, p_handle_msg),\
 	stream_read(osif_sw2hw, osif_hw2sw, hwt_signal))
 
-#define ROS_BORROW(p_handle)(\
+#define ROS_BORROW(p_handle, msg_ptr)(\
 	stream_write(osif_hw2sw, OSIF_CMD_ROS_BORROW),\
 	stream_write(osif_hw2sw, p_handle),\
-	stream_read(osif_sw2hw, osif_hw2sw, hwt_signal))
+	msg_ptr = stream_read(osif_sw2hw, osif_hw2sw, hwt_signal))
 
-#define ROS_PUBLISH_LOANED(p_handle, msg)(\
+#define ROS_PUBLISH_LOANED(p_handle, msg_ptr)(\
 	stream_write(osif_hw2sw, OSIF_CMD_ROS_PUBLISH_LOANED),\
 	stream_write(osif_hw2sw, p_handle),\
-	stream_write(osif_hw2sw, msg),\
+	stream_write(osif_hw2sw, msg_ptr),\
 	stream_read(osif_sw2hw, osif_hw2sw, hwt_signal))
 
-#define ROS_SUBSCRIBE_TAKE_LOANED(p_handle)(\
+#define ROS_SUBSCRIBE_TAKE_LOANED(p_handle, msg_ptr)(\
 	stream_write(osif_hw2sw, OSIF_CMD_ROS_TAKE_LOANED),\
 	stream_write(osif_hw2sw, p_handle),\
-	stream_read(osif_sw2hw, osif_hw2sw, hwt_signal))
+	msg_ptr = stream_read(osif_sw2hw, osif_hw2sw, hwt_signal))
 
-#define ROS_SUBSCRIBE_RETURN_LOANED(p_handle, msg)(\
+#define ROS_SUBSCRIBE_RETURN_LOANED(p_handle, msg_ptr)(\
 	stream_write(osif_hw2sw, OSIF_CMD_ROS_RETURN_LOANED),\
 	stream_write(osif_hw2sw, p_handle),\
-	stream_write(osif_hw2sw, msg),\
+	stream_write(osif_hw2sw, msg_ptr),\
 	stream_read(osif_sw2hw, osif_hw2sw, hwt_signal))
 
 
