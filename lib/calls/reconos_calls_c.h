@@ -191,11 +191,11 @@
 #define ROS_PUBLISH(p_handle, p_handle_msg) \
 	ros_publisher_publish(p_handle, p_handle_msg);
 
-#define ROS_BORROW(p_handle, p_handle_msg) \
-	ros_publisher_borrow_loaned_message(p_handle, p_handle_msg);
+#define ROS_BORROW(p_handle, msg_ptr) \
+	ros_publisher_borrow_loaned_message(p_handle, msg_ptr);
 
-#define ROS_PUBLISH_LOANED(p_handle, p_handle_msg) \
-	ros_publisher_publish_loaned_message(p_handle, p_handle_msg);
+#define ROS_PUBLISH_LOANED(p_handle, msg_ptr) \
+	ros_publisher_publish_loaned_message(p_handle, msg_ptr);
 
 #define ROS_SUBSCRIBE_TRYTAKE(p_handle,p_handle_msg) \
 	ros_subscriber_message_try_take(p_handle, p_handle_msg);
@@ -203,11 +203,11 @@
 #define ROS_SUBSCRIBE_TAKE(p_handle, p_handle_msg ) \
 	ros_subscriber_message_take(p_handle, p_handle_msg);
 
-#define ROS_SUBSCRIBE_TAKE_LOANED(p_handle, p_handle_msg ) \
-	ros_subscriber_loaned_message_take(p_handle, p_handle_msg);
+#define ROS_SUBSCRIBE_TAKE_LOANED(p_handle, msg_ptr ) \
+	ros_subscriber_loaned_message_take(p_handle, msg_ptr);
 
-#define ROS_SUBSCRIBE_RETURN_LOANED(p_handle, p_handle_msg ) \
-	ros_subscriber_loaned_message_return(p_handle, p_handle_msg);
+#define ROS_SUBSCRIBE_RETURN_LOANED(p_handle, msg_ptr ) \
+	ros_subscriber_loaned_message_return(p_handle, msg_ptr);
 
 
 #define ROS_SERVICESERVER_SEND_RESPONSE(p_handle, p_handle_msg) \
